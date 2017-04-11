@@ -1,0 +1,71 @@
+{% extends "header.html" %}
+{% block body %}
+
+<div class="container-fluid">
+  <h4>Reading list: {{p.total}} books</h4>
+</div>
+<div class="container-fluid">
+  <nav aria-label="Page navigation">
+    <ul class="pagination">
+      {% if p.has_previous() %}
+        <li>
+          <a href="{{url_for('reading_list', username=username, page=p.page-1)}}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+      {% endif %}
+
+      {% for page in range(p.from_page, p.to_page +1) %}
+        <li><a href="{{url_for('reading_list', username=username, page=page)}}">{{page}}</a></li>
+      {% endfor %}
+
+      {% if p.has_next() %}
+      <li>
+        <a href="{{url_for('reading_list', username=username, page=p.page+1)}}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+
+
+<div class="container-fluid"></div>
+
+<div class="container-fluid">
+  <div class="row">
+  {% for book in book_list[(p.from_item-1):(p.to_item)] %}
+      <div class="col-sm-6 col-md-4">
+          <div class="thumbnail" style="height:220px; width:420px">
+              <div class="caption">
+                <h3>{{book[1].title()}}
+                <br>
+                <small>{{book[2]}}</small>
+                </h3>
+
+                {% if book[3]|length > 110 %}
+                <p>{{book[3][:110] + '...'}}</p>
+                {% else %}
+                <p>{{book[3]}}</p>
+                {% endif %}
+
+                <p>Uploaded by: <a href="{{url_for('other_user_shelf', other_user_id=book[5])}}">{{book[6]}}</a></p>
+                <p></p>
+                <a href="{{url_for('uploads', filename=book[4])}}" target="blank" class="btn btn-primary btn-sm" role="button" name="filename">Read</a>
+
+                {% if session.logged_in %}
+                <a href="#" class="btn btn-default btn-sm" role="button">
+                <span class="glyphicon glyphicon-minus"> </span>
+                </a>
+                {% endif %}
+
+              </div>
+          </div>
+      </div>
+  {% endfor %}
+  </div>
+
+
+
+{% endblock %}

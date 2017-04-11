@@ -1,0 +1,78 @@
+{% extends "header.html" %}
+{% block body %}
+
+{% if not user_book_list[0][6] == session.username %}
+<div class="container-fluid">
+  <h4>Books uploaded by {{user_book_list[0][6]}}</h4><a href="{{url_for('reading_list', username=user_book_list[0][6])}}">View {{user_book_list[0][6]}}'s reading list</a>
+</div>
+{% endif %}
+
+{% if user_book_list[0][6] == session.username %}
+<div class="container-fluid">
+  <h4>Books uploaded by you</h4>
+  <a href="{{url_for('reading_list', username=user_book_list[0][6])}}">View your reading list</a>
+</div>
+
+{% endif %}
+
+
+<div class="container-fluid">
+  <nav aria-label="Page navigation">
+    <ul class="pagination">
+      {% if p.has_previous() %}
+        <li>
+          <a href="{{url_for('other_user_shelf', other_user_id=user_id, page=p.page-1)}}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+      {% endif %}
+
+      {% for page in range(p.from_page, p.to_page +1) %}
+        <li><a href="{{url_for('other_user_shelf', other_user_id=user_id, page=page)}}">{{page}}</a></li>
+      {% endfor %}
+
+      {% if p.has_next() %}
+      <li>
+        <a href="{{url_for('other_user_shelf', other_user_id=user_id, page=p.page+1)}}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+
+
+
+<div class="container-fluid">
+<div class="row">
+{% for book in user_book_list[(p.from_item-1):(p.to_item)] %}
+  <div class="col-sm-6 col-md-4">
+    <div class="thumbnail" style="height:220px; width:420px">
+      <!-- <img alt="{{book[2]}}"> -->
+      <div class="caption">
+        <h3>{{book[2].title()}}
+        <br>
+        <small>{{book[3]}}</small>
+        </h3>
+        <p>{{book[4]}}</p>
+        <p></p>
+        <a href="{{url_for('uploads', filename=book[5])}}" target="blank" class="btn btn-primary btn-sm" role="button" name="filename">Read</a>
+
+        {% if not user_book_list[0][6] == session.username and session.logged_in%}
+        <a href="#" class="btn btn-default btn-sm" role="button">
+        <span class="glyphicon glyphicon-plus"> </span>
+        </a>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+{% endfor %}
+</div>
+</div>
+
+
+
+
+{% endblock %}

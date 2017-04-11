@@ -1,0 +1,92 @@
+{% extends "header.html" %}
+{% block body %}
+
+<!-- Delete Button Modal -->
+<!-- <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Delete Book</h4>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this book?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <a href="{{url_for('delete_book', book_id=1)}}" type="button" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
+ -->
+<div class="container-fluid clearfix">
+<a href="/upload_file/{{session.username}}/" class="btn btn-success pull-left">
+<span class="glyphicon glyphicon-plus"> </span> Upload book</a>
+</div>
+<br>
+
+
+<div class="container-fluid">
+  <nav aria-label="Page navigation">
+    <ul class="pagination">
+      {% if p.has_previous() %}
+        <li>
+          <a href="{{url_for('user_bookshelf', username=username, page=p.page-1)}}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+      {% endif %}
+
+      {% for page in range(p.from_page, p.to_page +1) %}
+        <li><a href="{{url_for('user_bookshelf', username=username, page=page)}}">{{page}}</a></li>
+      {% endfor %}
+
+      {% if p.has_next() %}
+      <li>
+        <a href="{{url_for('user_bookshelf', username=username, page=p.page+1)}}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+    <h3 class="text-center"><small>Showing {{p.from_item}}-{{p.to_item}} of total {{p.total}}</small></h3>
+  </nav>
+</div>
+
+
+
+<div class="container-fluid">
+<div class="row">
+{% for book in user_book_list[(p.from_item-1):(p.to_item)] %}
+  <div class="col-sm-6 col-md-4">
+    <div class="thumbnail" style="height:220px; width:420px">
+      <!-- <img alt="{{book[2]}}"> -->
+      <div class="caption">
+        <h3>{{book[2]}}
+        <br>
+        <small>{{book[3]}}</small>
+        </h3>
+        <p>{{book[4]}}</p>
+        <p>
+
+        <form method="post" action="{{url_for('delete_book', book_id=book[1])}}">
+        <a href="{{url_for('edit_book', book_id=book[1])}}" class="btn btn-primary btn-sm" role="button">
+        <span class="glyphicon glyphicon-pencil"> </span> Edit
+        </a>
+        <a href="{{url_for('delete_book', book_id=book[1])}}" class="btn btn-danger btn-sm" role="button" onclick="return confirm('Are you sure you want to commit delete and go back?')">
+        <span class="glyphicon glyphicon-trash"> </span>
+        </a>
+
+        </form>
+
+        </p>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+</div>
+</div>
+
+
+{% endblock %}

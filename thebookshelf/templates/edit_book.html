@@ -1,0 +1,39 @@
+{% extends "header.html" %}
+{% block body %}
+
+<div class="container-fluid col-md-6 col-md-offset-3">
+    <h3>Edit book details</h3>
+    <hr>
+    <form action="/edit_book/{{book_id}}/" method="POST" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="book_name">Book Name</label>
+            <input type="text" class="form-control" id="book_name" placeholder="{{original_name}}" name="book_name" required>
+          </div>
+          <div class="form-group">
+            <label for="author_name">Author Name</label>
+            <input type="text" class="form-control" id="author_name" placeholder="{{original_author}}" name="author_name">
+          </div>
+
+          <div class="form-group">
+            <label for="super_category">Category</label><br>
+                <label class="radio-inline">
+                <input lass="form-control" type="radio" name="super_category" id="inlineRadio1" value="Fiction"> Fiction
+                </label>
+
+                <label class="radio-inline">
+                <input type="radio" name="super_category" id="inlineRadio2" value="Non-Fiction"> Non-Fiction
+                </label>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea class="form-control" id="description" placeholder="{{original_desc}}" name="description"></textarea>
+          </div>
+
+            <button type="submit" class="btn btn-success">Submit</button>
+    </form>
+</div>
+
+{% endblock %}
+
+
