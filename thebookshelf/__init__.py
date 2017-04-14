@@ -164,6 +164,7 @@ def insert_book(username, book_name, author_name, description, book_type, book, 
 
 
 @app.route('/upload_file/<username>/', methods=['GET', 'POST'])
+@login_required
 def upload_file(username):
     if request.method == 'POST':
         # check if the post request has the file part
@@ -228,7 +229,7 @@ def browsebooks(category='all'):
     try:
 
         page = request.args.get('page', type=int, default=1)
-        per_page = 9
+        per_page = 27
         c, conn = connection()
 
 
@@ -239,7 +240,8 @@ def browsebooks(category='all'):
                 from users u, books b, user_books ub
                 where b.book_id=ub.book_id and u.user_id = ub.user_id) as a
                 left join nlikes on
-                a.book_id=nlikes.book_id;''')
+                a.book_id=nlikes.book_id
+                order by num desc;''')
 
 
         if category == 'fiction':
@@ -249,7 +251,8 @@ def browsebooks(category='all'):
                 from users u, books b, user_books ub
                 where b.book_id=ub.book_id and u.user_id = ub.user_id and b.super_category=(%s)) as a
                 left join nlikes on
-                a.book_id=nlikes.book_id''', ('Fiction', ))
+                a.book_id=nlikes.book_id
+                order by num desc;''', ('Fiction', ))
 
         if category == 'non_fiction':
             c.execute('''select a.book_id, a.name, a.author, a.description, a.file, a.user_id, a.username, num
@@ -258,7 +261,8 @@ def browsebooks(category='all'):
                 from users u, books b, user_books ub
                 where b.book_id=ub.book_id and u.user_id = ub.user_id and b.super_category=(%s)) as a
                 left join nlikes on
-                a.book_id=nlikes.book_id''', ('Non-Fiction', ))
+                a.book_id=nlikes.book_id
+                order by num desc;''', ('Non-Fiction', ))
 
         book_list = c.fetchall()
         total = len(book_list)
@@ -507,7 +511,7 @@ def search():
 
             else:
                 total = len(book_list)
-                per_page = 6
+                per_page = 18
                 page = request.args.get('page', type=int, default=1)
                 pagination = Pagination(total, per_page, page)
                 return render_template("browse_books.html", book_list=book_list,

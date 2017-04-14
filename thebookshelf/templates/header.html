@@ -7,8 +7,10 @@
 
 
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/custom.css') }}">
 
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
+    <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
 </head>
 
 <!-- Header starts -->
@@ -50,16 +52,22 @@
       <ul class="nav navbar-nav navbar-right">
 
         {% if session.logged_in %}
-        <li><a href="#">About</a></li>
+        <li><a href="{{url_for('notifications', username=session.username)}}" data-original-title="Notifications" data-placement="bottom" data-toggle="tooltip" id="bell"><span class="glyphicon glyphicon-bell" aria-hidden="true"></span></a></li>
+
+        <li><a href="{{url_for('upload_file', username=session.username)}}" data-original-title="Upload book" data-placement="bottom" data-toggle="tooltip" id="plus"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a></li>
+
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{session.username}}<span class="caret"></span></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" data-original-title="reading list and more" data-placement="bottom" data-toggle="tooltip" id="user">
+          <span class="glyphicon glyphicon-user" aria-hidden="true"></span><span class="caret"></span></a>
           <ul class="dropdown-menu">
+            <li><a href="#">Signed in as <br>{{session.username}}</a></li>
+            <li role="separator" class="divider"></li>
             <li><a href="/user_bookshelf/{{session.username}}">Your Bookshelf</a></li>
             <li><a href="{{url_for('reading_list', username=session.username)}}">Your Reading List</a></li>
-            <li><a href="{{url_for('notifications', username=session.username)}}">Notifications</a></li>
             <li><a href="/logout/">Logout</a></li>
           </ul>
         </li>
+
         {% else %}
         <li><a href="#">About</a></li>
         <li><a href="/login/">Login</a></li>
@@ -90,12 +98,33 @@
 <div class="container-fluid">
 </div>
 
+
     <!-- Block Body-->
     {% block body %}{% endblock %}
 
+<!-- tooltip JS -->
+<script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript"></script>
+        <!-- <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js" type="text/javascript"></script> -->
+<script id="bsJs" type="text/javascript">
+        $(document).ready(function() {
+            $('#bell').tooltip();
+        });
+</script>
+
+<script id="bsJs" type="text/javascript">
+        $(document).ready(function() {
+            $('#plus').tooltip();
+        });
+</script>
+
+<script id="bsJs" type="text/javascript">
+        $(document).ready(function() {
+            $('#user').tooltip();
+        });
+</script>
     <!-- js includes -->
     <!-- js inclues -->
-  <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+  <!-- <script src="//code.jquery.com/jquery-1.11.1.min.js"></script> -->
   <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/dropdown.js') }}"></script>
 
