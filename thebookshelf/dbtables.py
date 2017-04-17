@@ -41,6 +41,24 @@ except Exception as e:
 finally:
     conn.close()
 
+# add super_category column to books
+conn = pymysql.connect(host="localhost", # your host, usually localhost
+                     user=dbconfig.USER, # your username
+                      passwd=dbconfig.PASSWORD, # your password
+                      db=dbconfig.DATABASE) # name of the data base
+
+try:
+    with conn.cursor() as cursor:
+        cursor.execute('''alter table books
+          add super_category varchar(100);''')
+        conn.commit()
+except Exception as e:
+    print("Exception in adding super_category column: {0}".format(e))
+finally:
+    conn.close()
+
+
+
 # create user_books table
 conn = pymysql.connect(host="localhost", # your host, usually localhost
                      user=dbconfig.USER, # your username
@@ -104,6 +122,23 @@ except Exception as e:
 finally:
     conn.close()
 
+# create view nlikes
+conn = pymysql.connect(host="localhost", # your host, usually localhost
+                     user=dbconfig.USER, # your username
+                      passwd=dbconfig.PASSWORD, # your password
+                      db=dbconfig.DATABASE) # name of the data base
+
+try:
+    with conn.cursor() as cursor:
+        cursor.execute('''create view
+          nlikes as select book_id, count(*) as num from (select distinct * from likes) as dist_likes
+          group by book_id;''')
+        conn.commit()
+except Exception as e:
+    print("Exception while creating view nlikes {0}".format(e))
+finally:
+    conn.close()
+
 # create requests table
 conn = pymysql.connect(host="localhost", # your host, usually localhost
                      user=dbconfig.USER, # your username
@@ -122,5 +157,22 @@ try:
         conn.commit()
 except Exception as e:
     print(str(e))
+finally:
+    conn.close()
+
+# add timesatamp column to requests table
+conn = pymysql.connect(host="localhost", # your host, usually localhost
+                     user=dbconfig.USER, # your username
+                      passwd=dbconfig.PASSWORD, # your password
+                      db=dbconfig.DATABASE) # name of the data base
+
+try:
+    with conn.cursor() as cursor:
+        cursor.execute('''alter table requests add ts
+          timestamp on update current_timestamp
+          not null default current_timestamp ;''')
+        conn.commit()
+except Exception as e:
+    print("Exception in creating ts column {0}".format(e))
 finally:
     conn.close()

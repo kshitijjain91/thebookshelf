@@ -59,6 +59,7 @@
   </p>
   <h3 class="text-center" class="text-muted" style="font-size: 20px"><small>Showing {{p.from_item}}-{{p.to_item}} of total {{p.total}}</small></h3>
   <div class="row">
+
   {% for book in book_list[(p.from_item-1):(p.to_item)] %}
       <div class="col-sm-6 col-md-4">
           <div class="thumbnail" style="height:220px; width:420px">
@@ -68,8 +69,8 @@
                 <small>{{book[2]}}</small>
                 </h3>
 
-                {% if book[3]|length > 110 %}
-                <p>{{book[3][:110] + '...'}}</p>
+                {% if book[3]|length > 90 %}
+                <p>{{book[3][:90] + '...'}}</p>
 
                 {% else %}
                 <p>{{book[3]}}</p>

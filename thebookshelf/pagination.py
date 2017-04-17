@@ -17,7 +17,7 @@ class Pagination():
         self.page = page
         self.from_item = (self.page -1)*self.per_page + 1
         self.to_item = min(self.page*self.per_page, self.total)
-        self.pagediv = ceil(self.page/5)
+        self.pagediv = int(ceil(self.page/5))
         self.from_page = (self.pagediv -1)*5 + 1
         self.to_page = min(self.pagediv*5, self.num_pages)
 
@@ -32,7 +32,7 @@ class Pagination():
         return self.page > 1
 
 # How to use:
-# p= Pagination(13, 2, 6)
+# p= Pagination(0, 6, 1)
 # print("num_pages = {0}".format(p.num_pages))
 # print("\n")
 # print("from_item = {0}".format(p.from_item))
@@ -43,4 +43,5 @@ class Pagination():
 # print("\n")
 # print("from_page = {0}".format(p.from_page))
 # print("to_page = {0}".format(p.to_page))
+# print("pagediv = {0}".format(p.pagediv))
 
