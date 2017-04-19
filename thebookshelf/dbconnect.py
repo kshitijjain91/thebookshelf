@@ -1,5 +1,5 @@
 import pymysql
-import dbconfig
+import thebookshelf.dbconfig as dbconfig
 
 # mysql --user=root -p
 def connection():

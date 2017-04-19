@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, session, url_for, redirect, request, flash, g, send_from_directory, current_app, send_file
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
 from passlib.hash import sha256_crypt
@@ -5,9 +6,9 @@ from flask_login import LoginManager, login_user, logout_user, current_user, log
 import pymysql
 import os
 from werkzeug.utils import secure_filename
-from dbconnect import connection
+from thebookshelf.pagination import Pagination
+from thebookshelf.dbconnect import connection
 import gc
-from pagination import Pagination
 from functools import wraps
 import datetime
 import calendar
@@ -559,4 +560,4 @@ def notifications(username):
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key_1231wqdn'
-    app.run(debug=True, port=5151)
+    app.run()
