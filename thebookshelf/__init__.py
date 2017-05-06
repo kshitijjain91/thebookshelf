@@ -7,7 +7,9 @@ import pymysql
 import os
 from werkzeug.utils import secure_filename
 from thebookshelf.pagination import Pagination
+from thebookshelf.auth import OAuthSignIn
 from thebookshelf.dbconnect import connection
+from thebookshelf.config import OAUTH_CREDENTIALS
 import gc
 from functools import wraps
 import datetime
@@ -16,14 +18,31 @@ import calendar
 
 app = Flask(__name__)
 
+# for oauth
+app.config.from_object('thebookshelf.config')
+
+GOOGLE_LOGIN_CLIENT_ID = "425510403719-nbr3hg7m3ftlpodd6lkq3ssp9d746fej.apps.googleusercontent.com"
+GOOGLE_LOGIN_CLIENT_SECRET = "-fJ6tyXANyUWKSWGCsMeDyvh"
+
+OAUTH_CREDENTIALS={
+        'google': {
+            'id': GOOGLE_LOGIN_CLIENT_ID,
+            'secret': GOOGLE_LOGIN_CLIENT_SECRET
+        }
+}
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+# login_manager.login_view = 'login'
+
+
 # for file uploads
 UPLOAD_FOLDER = 'uploads/'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'epub'])
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'epub', 'mobi'])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-@app.route('/', methods=['GET', 'POST'])
-def homepage():
-    return render_template("homepage.html")
+
+
 
 def login_required(f):
     @wraps(f)
@@ -57,8 +76,8 @@ def login():
                 if sha256_crypt.verify(request.form['password'], data):
                     session['logged_in'] = True
                     session['username'] = data_row[2]
-                    flash('You are now logged in ' + str(session['username']))
-                    return redirect(url_for('homepage'))
+                    flash('You are now logged in as ' + str(session['username']))
+                    return redirect(url_for('browsebooks'))
                 else:
                     flash('Invalid password, try again.')
         gc.collect()
@@ -76,7 +95,7 @@ def logout():
     session.clear()
     flash('You have been logged out.')
     gc.collect()
-    return redirect(url_for('homepage'))
+    return redirect(url_for('browsebooks'))
 
 
 # defining wtforms class for registration form
@@ -89,6 +108,11 @@ class RegistrationForm(Form):
     ])
     confirm = PasswordField('Repeat Password')
     accept_tos = BooleanField('I accept the terms of service.', [validators.DataRequired()])
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 @app.route('/signup/', methods=['GET', 'POST'])
@@ -120,7 +144,7 @@ def signup():
                 gc.collect()
                 session['logged_in'] = True
                 session['username'] = username
-                return redirect(url_for('homepage'))
+                return redirect(url_for('browsebooks'))
         gc.collect()
         return render_template('signup.html', form=form)
     except Exception as e:
@@ -184,9 +208,9 @@ def upload_file(username):
             file.save(os.path.join(app_base_path, filename))
 
             book = os.path.join(app_base_path, filename)
-            book_name = request.form['book_name']
-            author_name = request.form['author_name']
-            description = request.form['description']
+            book_name = request.form['book_name'].encode('utf-8')
+            author_name = request.form['author_name'].encode('utf-8')
+            description = request.form['description'].encode('utf-8')
             book_type = filename.rsplit('.', 1)[1].lower()
             super_category = request.form.get('super_category', None)
 
@@ -224,7 +248,7 @@ def user_bookshelf(username):
     except Exception as e:
         flash(str(e))
 
-
+@app.route('/', methods=['GET', 'POST'])
 @app.route('/browse_books/<category>/', methods = ['GET'])
 def browsebooks(category='all'):
     try:
@@ -235,9 +259,9 @@ def browsebooks(category='all'):
 
 
         if category == 'all':
-            c.execute('''select a.book_id, a.name, a.author, a.description, a.file, a.user_id, a.username, num
+            c.execute('''select a.book_id, a.name, a.author, a.description, a.file, a.user_id, a.username, num, a.email
                 from
-                (select b.book_id, name, author, description, file, u.user_id, u.username
+                (select b.book_id, name, author, description, file, u.user_id, u.username, u.email
                 from users u, books b, user_books ub
                 where b.book_id=ub.book_id and u.user_id = ub.user_id) as a
                 left join nlikes on
@@ -246,9 +270,9 @@ def browsebooks(category='all'):
 
 
         if category == 'fiction':
-            c.execute('''select a.book_id, a.name, a.author, a.description, a.file, a.user_id, a.username, num
+            c.execute('''select a.book_id, a.name, a.author, a.description, a.file, a.user_id, a.username, num, a.email
                 from
-                (select b.book_id, name, author, description, file, u.user_id, u.username
+                (select b.book_id, name, author, description, file, u.user_id, u.username, u.email
                 from users u, books b, user_books ub
                 where b.book_id=ub.book_id and u.user_id = ub.user_id and b.super_category=(%s)) as a
                 left join nlikes on
@@ -256,9 +280,9 @@ def browsebooks(category='all'):
                 order by num desc;''', ('Fiction', ))
 
         if category == 'non_fiction':
-            c.execute('''select a.book_id, a.name, a.author, a.description, a.file, a.user_id, a.username, num
+            c.execute('''select a.book_id, a.name, a.author, a.description, a.file, a.user_id, a.username, num, a.email
                 from
-                (select b.book_id, name, author, description, file, u.user_id, u.username
+                (select b.book_id, name, author, description, file, u.user_id, u.username, u.email
                 from users u, books b, user_books ub
                 where b.book_id=ub.book_id and u.user_id = ub.user_id and b.super_category=(%s)) as a
                 left join nlikes on
@@ -323,6 +347,7 @@ def add_to_reading_list(book_id, username='default_user'):
         c.execute(''' insert into reading_list (user_id, book_id)
             values (%s, %s);''', (user_id, book_id))
         conn.commit()
+        flash('The book has been added to your reading list.')
         return redirect(redirect_url())
 
     except Exception as e:
@@ -410,7 +435,7 @@ def reading_list(username):
         pagination = Pagination(total, per_page, page)
 
         return render_template("reading_list.html", p=pagination,
-            book_list = user_book_list, username=username)
+            book_list = user_book_list, username=username, userid = user_id)
 
     except Exception as e:
         flash(e)
@@ -439,6 +464,22 @@ def delete_book(book_id):
     finally:
         conn.close()
 
+@app.route('/remove_from_reading_list/<username>/<book_id>/', methods=['GET', 'POST'])
+def remove_from_reading_list(username, book_id):
+    try:
+        user_id = username_to_userid(username)
+        c, conn = connection()
+        c.execute('''delete from reading_list
+            where user_id=(%s) and book_id=(%s);''',
+            (user_id, book_id))
+        conn.commit()
+        flash('The book has been removed from your reading list.')
+        return redirect(redirect_url())
+    except Exception as e:
+        flash(e)
+    finally:
+        conn.close()
+
 
 @app.route('/edit_book/<book_id>/', methods=['GET', 'POST'])
 def edit_book(book_id):
@@ -452,9 +493,9 @@ def edit_book(book_id):
     original_desc = book_data[2]
 
     if request.method == 'POST':
-        book_name = request.form['book_name']
-        author_name = request.form['author_name']
-        description = request.form['description']
+        book_name = request.form['book_name'].encode('utf-8')
+        author_name = request.form['author_name'].encode('utf-8')
+        description = request.form['description'].encode('utf-8')
         super_category = request.form.get('super_category', None)
         try:
             c, conn = connection()
@@ -544,13 +585,78 @@ def notifications(username):
         flash(e)
 
 
+@app.route('/back/')
+def back():
+    return redirect(redirect_url())
+
 
 
 #random comment to test gitignore
 
+# oauth
+@app.route('/authorize/<provider>')
+def oauth_authorize(provider):
+    # Flask-Login function
+    # if not current_user.is_anonymous():
+    #     return redirect(url_for('browsebooks'))
+    oauth = OAuthSignIn.get_provider(provider)
+    return oauth.authorize()
 
 
+@app.route('/callback/<provider>')
+def oauth_callback(provider):
+    # if not current_user.is_anonymous():
+    #     return redirect(url_for('browsebooks'))
+    oauth = OAuthSignIn.get_provider(provider)
+    username, email = oauth.callback()
+    session['logged_in'] = True
+    session['username'] = email
 
+    if email is None:
+        flash('Authentication failed. Can you try using another account?')
+        return(url_for('browsebooks'))
+
+    # Look if the user already exists, if no then sign him up
+    try:
+        c, conn = connection()
+        emails = c.execute(''' select email from users where email = (%s);''', (email, ))
+
+        if int(emails) == 0:
+            # Create the user
+            if username is None or username == "":
+                username = email.split('@')[0]
+
+            c.execute(''' insert into users (email, username) value (%s, %s);''', (email, username))
+            conn.commit()
+
+    except Exception as e:
+        flash(str(e))
+    finally:
+        conn.close()
+
+    # if email is None:
+    #     # I need a valid email address for my user identification
+    #     flash('Authentication failed.')
+    #     return redirect(url_for('browsebooks'))
+    # # Look if the user already exists
+    # # user=User.query.filter_by(email=email).first()
+    # if not user:
+    #     # Create the user. Try and use their name returned by Google,
+    #     # but if it is not set, split the email address at the @.
+    #     nickname = username
+    #     if nickname is None or nickname == "":
+    #         nickname = email.split('@')[0]
+
+    #     # We can do more work here to ensure a unique nickname, if you
+    #     # require that.
+    #     user=User(nickname=nickname, email=email)
+    #     db.session.add(user)
+    #     db.session.commit()
+    # Log in the user, by default remembering them for their next visit
+    # unless they log out.
+    # login_user(user, remember=True)
+    flash("You are logged in as {0}".format(email))
+    return redirect(url_for('browsebooks'))
 
 
 

@@ -6,11 +6,16 @@
     <meta name="viewport" content = "width=device-width, initial-scale=1.0">
 
 
+
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/custom.css') }}">
 
     <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
     <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
 </head>
 
 <!-- Header starts -->
@@ -25,45 +30,57 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/">Home</a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Browse Books <span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a href="{{url_for('browsebooks', category='all')}}">All Books</a></li>
-            <li><a href="{{url_for('browsebooks', category='fiction')}}">Fiction</a></li>
-            <li><a href="{{url_for('browsebooks', category='non_fiction')}}">Non-Fiction</a></li>
-          </ul>
-        </li>
-      </ul>
+
       <!-- search box -->
       <form action="{{url_for('search')}}" class="navbar-form navbar-left">
         <div class="form-group">
-          <input type="text" class="form-control" placeholder="book, author or user"
-          name="search_string" value="{{request.form.search_string}}">
+
+          <div class="form-group has-feedback">
+          <input type="text" class="form-control" placeholder=" search by book, author or user"
+          name="search_string" value="{{request.form.search_string}}"
+          style="border-radius: 20px; width: 280px;">
+          <span class="glyphicon glyphicon-search form-control-feedback"></span>
+          </div>
+
         </div>
-        <button type="submit" class="btn btn-primary">Go!</button>
+
+        <!-- <button type="submit" class="btn btn-primary" style="background-color:#000000;">
+          <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+        </button> -->
       </form>
+
+
+
+      <ul class="nav navbar-nav" style="position: absolute; width:100%; left:40%; text-align: center; margin:auto">
+
+            <li><a href="{{url_for('browsebooks', category='all')}}" style="font-size: 14px">ALL</a></li>
+            <li><a href="{{url_for('browsebooks', category='fiction')}}" style="font-size: 14px">FICTION</a></li>
+            <li><a href="{{url_for('browsebooks', category='non_fiction')}}" style="font-size: 14px">NON-FICTION</a></li>
+
+      </ul>
+
+
 
       <ul class="nav navbar-nav navbar-right">
 
         {% if session.logged_in %}
-        <li><a href="{{url_for('notifications', username=session.username)}}" data-original-title="Notifications" data-placement="bottom" data-toggle="tooltip" id="bell"><span class="glyphicon glyphicon-bell" aria-hidden="true"></span></a></li>
+        <li><a href="{{url_for('upload_file', username=session.username)}}" data-original-title="Upload book" data-placement="bottom" data-toggle="tooltip" id="upload" class="tt"><span class="glyphicon glyphicon-arrow-up tt" aria-hidden="true"></span></a></li>
 
-        <li><a href="{{url_for('upload_file', username=session.username)}}" data-original-title="Upload book" data-placement="bottom" data-toggle="tooltip" id="plus"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a></li>
+        <li><a href="{{url_for('notifications', username=session.username)}}" data-original-title="Notifications" data-placement="bottom" data-toggle="tooltip" id="bell" class="tt"><span class="glyphicon glyphicon-bell tt" aria-hidden="true"></span></a></li>
+
+        <li><a href="{{url_for('reading_list', username=session.username)}}" data-original-title="Your reading list" data-placement="bottom" data-toggle="tooltip" id="plus" class="tt"><span class="glyphicon glyphicon-book tt" aria-hidden="true"></span></a></li>
 
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" data-original-title="reading list and more" data-placement="bottom" data-toggle="tooltip" id="user">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" data-original-title="your profile and more" data-placement="bottom" data-toggle="tooltip" id="user">
           <span class="glyphicon glyphicon-user" aria-hidden="true"></span><span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="#">Signed in as <br>{{session.username}}</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="/user_bookshelf/{{session.username}}">Your Bookshelf</a></li>
-            <li><a href="{{url_for('reading_list', username=session.username)}}">Your Reading List</a></li>
+            <li><a href="/user_bookshelf/{{session.username}}">Your Uploads</a></li>
             <li><a href="/logout/">Logout</a></li>
           </ul>
         </li>
@@ -106,6 +123,12 @@
         <!-- <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js" type="text/javascript"></script> -->
 <script id="bsJs" type="text/javascript">
         $(document).ready(function() {
+            $('.tt').tooltip();
+        });
+</script>
+
+<!-- <script id="bsJs" type="text/javascript">
+        $(document).ready(function() {
             $('#bell').tooltip();
         });
 </script>
@@ -120,12 +143,13 @@
         $(document).ready(function() {
             $('#user').tooltip();
         });
-</script>
+</script> -->
     <!-- js includes -->
     <!-- js inclues -->
   <!-- <script src="//code.jquery.com/jquery-1.11.1.min.js"></script> -->
-  <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/dropdown.js') }}"></script>
+
+  <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script> -->
+  <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/dropdown.js') }}"></script> -->
 
 </body>
 </html>

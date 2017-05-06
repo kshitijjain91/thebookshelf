@@ -1,51 +1,64 @@
 {% extends "header.html" %}
 {% block body %}
-   <body>
 
-    <div class="container-fluid col-md-6 col-md-offset-3">
+<div class="container-fluid">
+  <br><br><br>
+  <div class="row" style="display: flex; align-items: center;">
 
-      <h4>Sign Up</h4>
-      <hr>
-      {% from "_formhelpers.html" import render_field %}
-      <form method=post action="/signup/">
-      <div class="form-group">
-        <dl>
-        <h5>Email</h5>
-        {{ form.email(class='form-control', placeholder="youremail@example.com") }}
+
+    <div class="col-md-4 col-md-offset-2" style="border-right: 1px solid #939393;">
+
+        <h4>Sign Up Here</h4>
+        <hr>
         <br>
-        <h5>Username</h5>
-        {{ form.username(class='form-control', placeholder="example_username")}}
-        <br>
-        <h5>Password</h5>
-        {{ form.password(class='form-control', placeholder="********") }}
-        <br>
-        <h5>Confirm Password</h5>
-        {{ form.confirm(class='form-control', placeholder="********") }}
-        <br>
-        {{ render_field(form.accept_tos) }}
-        </dl>
-        <p><input type=submit value=Register class="btn btn-success"></p>
-      </form>
-      {% if error %}
-      <p class="error"><strong>Error:</strong> {{ error }}</p>
-      {% endif %}
-    <div class="container">
-       <br>
-      {% for paragraph in Body_info %}
-      <p>{{ paragraph }}</p>
-      {% endfor %}
-      </div>
+
+        {% from "_formhelpers.html" import render_field %}
+
+        <form method=post action="/signup/">
+        <div class="form-group">
+          <dl>
+          <h5>Email</h5>
+          {{ form.email(class='form-control', placeholder="youremail@example.com") }}
+          <br>
+          <h5>Username</h5>
+          {{ form.username(class='form-control', placeholder="example_username")}}
+          <br>
+          <h5>Password</h5>
+          {{ form.password(class='form-control', placeholder="********") }}
+          <br>
+          <h5>Confirm Password</h5>
+          {{ form.confirm(class='form-control', placeholder="********") }}
+          <br>
+          {{ render_field(form.accept_tos) }}
+          </dl>
+          <p><input type=submit value=Register class="btn btn-primary"></p>
+        </div>
+        </form>
+
+        {% if error %}
+        <p class="error"><strong>Error:</strong> {{ error }}</p>
+        {% endif %}
+
+      <div class="container">
+           <br>
+          {% for paragraph in Body_info %}
+          <p>{{ paragraph }}</p>
+          {% endfor %}
       </div>
 
     </div>
 
-   </body>
+    <div class="col-md-4 col-md-offset-1">
+       <span style="display: inline-block;"><a href={{ url_for('oauth_authorize', provider='google') }}><img src="{{ url_for('static', filename='images/google_blue.png') }}" /></a></span>
+    </div>
+
+</div>
 {% endblock %}
 
 
 <!--  -->
 
-<div class="container-fluid col-md-6 col-md-offset-3">
+<!-- <div class="container-fluid col-md-6 col-md-offset-3">
 <form>
   <div class="form-group">
     <label for="exampleInputEmail1">Email address</label>
@@ -70,6 +83,6 @@
   </div>
   <button type="submit" class="btn btn-default">Submit</button>
 </form>
-</div>
+</div> -->
 
 

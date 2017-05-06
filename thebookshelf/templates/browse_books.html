@@ -45,15 +45,48 @@
   </div>
 </div>
 
+<!-- Read More Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="exampleModalLabel">Title</h4>
+        <small class="modal-author">Lorem Ipsum</small>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-description">Description</p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- Modal ends-->
+
 
 <div class="container-fluid"></div>
 
 <div class="container-fluid">
-  <h2 class="text-center">Bookshelf - {{category.title().replace('_', '-')}} Books</h2>
-  <p class="text-center">
+
+{% if category == "all" %}
+  <h1 class="text-center"><strong>Bookshelf</strong></h1>
+{% else %}
+  <h1 class="text-center"><strong>{{category.title().replace('_', '-')}}</strong></h1>
+{% endif %}
+
+  <p class="text-center" style="font-size: 13px;">
+  <br>
+  Read and share books you love. <br><br>Didn't find what you are looking for? <br>
   <u>
   <a href="#" data-toggle="modal" data-target="#requestModal" class="text-center text-muted" style="font-size: 13px;">
   Request other users to upload a book.
+  <br>
+  <br>
   </a>
   </u>
   </p>
@@ -62,44 +95,74 @@
 
   {% for book in book_list[(p.from_item-1):(p.to_item)] %}
       <div class="col-sm-6 col-md-4">
-          <div class="thumbnail" style="height:220px; width:420px">
+          <div class="thumbnail" style="height:240px; width:420px">
               <div class="caption">
-                <h3>{{book[1].title()}}
+                <h3>
+                <a href="{{url_for('uploads', filename=book[4])}}" target="blank" name="filename"
+                style="color:black;">
+                {{book[1].title()}}
+                </a>
+
                 <br>
                 <small>{{book[2]}}</small>
+
+                <a href="{{url_for('add_to_reading_list', username=session.username, book_id=book[0])}}" class="btn"
+                data-original-title="Add to reading list" data-placement="bottom" data-toggle="tooltip"
+                style="color:black;">
+                </a>
+
                 </h3>
 
                 {% if book[3]|length > 90 %}
-                <p>{{book[3][:90] + '...'}}</p>
+                <p>{{book[3][:90] + '...'}}
+                <a href="#" data-toggle="modal" data-target="#exampleModal"
+                data-title="{{book[1]}}" data-description="{{book[3]}}"
+                data-author="{{book[2]}}">Read more</a>
+                </p>
 
                 {% else %}
                 <p>{{book[3]}}</p>
                 {% endif %}
 
+                {% if book[6] == "" %}
+                <p>Uploaded by: <a href="{{url_for('other_user_shelf', other_user_id=book[5])}}">{{book[8]}}</a></p>
+                {% else %}
                 <p>Uploaded by: <a href="{{url_for('other_user_shelf', other_user_id=book[5])}}">{{book[6]}}</a></p>
+                {% endif %}
                 <p></p>
-                <a href="{{url_for('uploads', filename=book[4])}}" target="blank" class="btn btn-primary btn-sm" role="button" name="filename">Read</a>
+
 
                 {% if session.logged_in %}
 
-                <a href="{{url_for('add_to_reading_list', username=session.username, book_id=book[0])}}" class="btn btn-default btn-sm"
-                data-original-title="Add to reading list" data-placement="bottom" data-toggle="tooltip">
+                <a href="{{url_for('add_to_reading_list', username=session.username, book_id=book[0])}}" class="tt"
+                data-original-title="Add to reading list" data-placement="bottom" data-toggle="tooltip"
+                style="color:black;">
                 <span class="glyphicon glyphicon-plus"></span>
                 </a>
-                <a href="{{url_for('add_to_likes', username=session.username, book_id=book[0])}}" class="btn btn-default btn-sm">
+
+                <span style="display:inline-block; width: 5px;"></span>
+
+                <a href="{{url_for('add_to_likes', username=session.username, book_id=book[0])}}" class="tt"
+                data-original-title="Like" data-placement="bottom" data-toggle="tooltip">
                 <span class="glyphicon glyphicon-heart" style="color: #ff6666;"></span>
                 <span class="badge" style="font-size: 10px">
                 {{book[7]}}
                 </span>
                 </a>
+                <!-- <small style="font-size: 14px; color: #939393;">n readers</small> -->
 
                 {% else %}
 
-                <a href="{{url_for('add_to_reading_list', username='guest', book_id=book[0])}}" class="btn btn-default btn-sm" role="button"
-                data-original-title="Add to reading list" data-placement="bottom" data-toggle="tooltip">
+                <a href="{{url_for('add_to_reading_list', username='guest', book_id=book[0])}}" class="tt"
+                data-original-title="Add to reading list" data-placement="bottom" data-toggle="tooltip"
+                style="color:black;">
                 <span class="glyphicon glyphicon-plus"></span>
                 </a>
-                <a href="{{url_for('add_to_likes', username='guest', book_id=book[0])}}" class="btn btn-default btn-sm" role="button">
+
+                <span style="display:inline-block; width: 5px;"></span>
+
+                <a href="{{url_for('add_to_likes', username='guest', book_id=book[0])}}" class="tt"
+                data-original-title="Like" data-placement="bottom" data-toggle="tooltip">
                 <span class="glyphicon glyphicon-heart" style="color: #ff6666;"></span>
                 <span class="badge" style="font-size: 10px">
                 {{book[7]}}
@@ -107,7 +170,6 @@
                 </a>
 
                 {% endif %}
-
 
               </div>
           </div>
@@ -144,12 +206,36 @@
     </div>
   </nav>
 </div>
+
+<!-- read more modal -->
+<script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+
+$(function(){
+$('#exampleModal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // element that triggered the modal
+  var title = button.data('title')
+  var description = button.data('description')
+  var author = button.data('author')// Extract info from data-* attributes
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this)
+  modal.find('.modal-title').text(title)
+  modal.find('.modal-description').text(description)
+  modal.find('.modal-author').text(author)
+})
+});
+
+</script>
+
  <!-- tooltip -->
 <script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript"></script>
         <!-- <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js" type="text/javascript"></script> -->
         <script id="bsJs" type="text/javascript">
         $(document).ready(function() {
-            $('.btn').tooltip();
+            $('.tt').tooltip();
         });
         </script>
 
